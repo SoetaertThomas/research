@@ -1,0 +1,85 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <title>Astro</title>
+  </head>
+  <body>
+    <h1>Astro</h1>
+    <canvas class="webgl"></canvas>
+  </body>
+</html>
+<script>
+  import * as THREE from 'three'
+  import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+  import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+  import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+
+  var scene = new THREE.Scene()
+
+  const canvas = document.querySelector('canvas.webgl')
+
+  var camera = new THREE.PerspectiveCamera(
+    60,
+    window.innerWidth / window.innerHeight,
+    1,
+    1000,
+  )
+  camera.position.set(2, 3, 5)
+  camera.lookAt(scene.position)
+
+  const renderer = new THREE.WebGLRenderer({
+    canvas: canvas,
+    alpha: true,
+  })
+
+  const sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  }
+
+  renderer.shadowMap.enabled = true
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap
+  renderer.setSize(sizes.width, sizes.height)
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+  renderer.setClearColor('#ADD8E6', 0.5)
+
+  document.body.appendChild(canvas)
+
+  const controls = new OrbitControls(camera, canvas)
+  controls.update()
+
+  const dracolader = new DRACOLoader()
+  dracolader.setDecoderPath('../draco/')
+
+  const gltfLoader = new GLTFLoader()
+  gltfLoader.setDRACOLoader(dracolader)
+
+  const materials = []
+
+  gltfLoader.load('../../public/model/skateboard/scene.gltf', (gltf) => {
+    const scenexx = gltf.scene
+
+    scenexx.traverse(function (object) {
+      if (object.material) materials.push(object.material)
+      console.log(materials)
+    })
+    gltf.scene.scale.set(0.5, 0.5, 0.5)
+    scene.add(gltf.scene)
+  })
+
+  const ambientLight = new THREE.AmbientLight(0xf0f2d4, 0.8)
+  scene.add(ambientLight)
+
+  //controls.update() must be called after any manual changes to the camera's transform
+
+  const tick = () => {
+    renderer.render(scene, camera)
+    controls.update()
+
+    window.requestAnimationFrame(tick)
+  }
+  tick()
+</script>
