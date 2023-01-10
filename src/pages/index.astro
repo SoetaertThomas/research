@@ -1,3 +1,6 @@
+---
+---
+
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -16,6 +19,7 @@
   import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
   import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
   import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+  import { GUI } from 'dat.gui'
 
   var scene = new THREE.Scene()
 
@@ -49,7 +53,61 @@
   document.body.appendChild(canvas)
 
   const controls = new OrbitControls(camera, canvas)
+  controls.target.set(0, 0, 0)
+  controls.rotateSpeed = 10
+  controls.enableDamping = true
+  controls.enableZoom = true
+  controls.autoRotate = true
   controls.update()
+
+  const gui = new GUI()
+  //   var img = {
+  //     changeImage: function () {
+  //       console.log('clicked')
+  //       let click = document.querySelector('.click')
+  //       let input = document.createElement('button')
+  //       input.id = 'modal1-trigger'
+  //       click.appendChild(input)
+  //       console.log(input)
+  //       input.click()
+  //       //   input.onchange = () => {
+  //       //     // you can use this method to get file and perform respective operations
+  //       //     let url = input.value
+  //       //     console.log(url)
+  //       //     new THREE.TextureLoader().load(url, (texture) => {
+  //       //       //Update Texture
+  //       //       materials[0].map = texture
+  //       //       materials[0].needsUpdate = true
+  //       //     })
+  //       //   }
+  //     },
+  //   }
+  const options = {
+    Deck: 0x00ff00,
+    Wheels: 0x00ff00,
+  }
+  gui.addColor(options, 'Wheels').onChange((e) => {
+    materials[6].color.set(e)
+  })
+
+  // gui.add(img, 'changeImage').name('change image')
+  const params = {
+    textField: 'image url',
+  }
+
+  gui.add(params, 'textField').onFinishChange(function (value) {
+    let url = value
+    console.log(url)
+    new THREE.TextureLoader().load(url, (texture) => {
+      //Update Texture
+      materials[0].map = texture
+      materials[0].needsUpdate = true
+    })
+  })
+
+  gui.addColor(options, 'Deck').onChange((e) => {
+    materials[0].color.set(e)
+  })
 
   const dracolader = new DRACOLoader()
   dracolader.setDecoderPath('../draco/')
