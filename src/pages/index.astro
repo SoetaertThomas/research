@@ -11,6 +11,9 @@
   </head>
   <body>
     <h1>Astro</h1>
+    <button id="template1">skateboard 1</button>
+    <button id="template2">skateboard 2</button>
+    <button id="template3">skateboard 3</button>
     <canvas class="webgl"></canvas>
   </body>
 </html>
@@ -95,15 +98,18 @@
     textField: 'image url',
   }
 
-  gui.add(params, 'textField').onFinishChange(function (value) {
-    let url = value
-    console.log(url)
-    new THREE.TextureLoader().load(url, (texture) => {
-      //Update Texture
-      materials[0].map = texture
-      materials[0].needsUpdate = true
+  gui
+    .add(params, 'textField')
+    .name('Deck art')
+    .onFinishChange(function (value) {
+      let url = value
+      console.log(url)
+      new THREE.TextureLoader().load(url, (texture) => {
+        //Update Texture
+        materials[0].map = texture
+        materials[0].needsUpdate = true
+      })
     })
-  })
 
   gui.addColor(options, 'Deck').onChange((e) => {
     materials[0].color.set(e)
@@ -132,6 +138,64 @@
   scene.add(ambientLight)
 
   //controls.update() must be called after any manual changes to the camera's transform
+
+  const template1 = () => {
+    new THREE.TextureLoader().load(
+      'https://static.vecteezy.com/ti/vecteur-libre/p1/4684690-paix-dans-graffiti-art-gratuit-vectoriel.jpg',
+      (texture) => {
+        //Update Texture
+        materials[0].map = texture
+        materials[0].needsUpdate = true
+      },
+    )
+    materials[6].color.set(0x52a0f0)
+    materials[0].color.set(0xff00b4)
+  }
+  const template2 = () => {
+    new THREE.TextureLoader().load(
+      'https://sites.create-cdn.net/siteimages/19/1/7/191789/15/9/6/15966898/1000x741.jpg?1510065961',
+      (texture) => {
+        //Update Texture
+        materials[0].map = texture
+        materials[0].needsUpdate = true
+      },
+    )
+    materials[6].color.set(0xdcf2d6)
+    materials[0].color.set(0xffffff)
+  }
+  const template3 = () => {
+    new THREE.TextureLoader().load(
+      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRxdNIqmDF7sBA0V7GmkbElkuXFbRO-KRGUimhIWlaH7X3zZOvAjv7b3sTCZ6G0GPJsp_A&usqp=CAU',
+      (texture) => {
+        //Update Texture
+        materials[0].map = texture
+        materials[0].needsUpdate = true
+      },
+    )
+    materials[6].color.set(0xff9500)
+    materials[0].color.set(0xff0000)
+  }
+
+  const btn1 = document.querySelector('#template1')
+  console.log(btn1)
+  btn1.addEventListener('click', () => {
+	console.log('template1')
+    template1()
+  })
+
+  const btn2 = document.querySelector('#template2')
+  console.log(btn2)
+  btn2.addEventListener('click', () => {
+	console.log('template2')
+    template2()
+  })
+
+  const btn3 = document.querySelector('#template3')
+  console.log(btn3)
+  btn3.addEventListener('click', () => {
+	console.log('template3')
+    template3()
+  })
 
   const tick = () => {
     renderer.render(scene, camera)
