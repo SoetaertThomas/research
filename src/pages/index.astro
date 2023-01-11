@@ -7,13 +7,46 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>Astro</title>
+    <title>Skateboard configurator</title>
+    <style>
+      .templates {
+        position: fixed;
+        top: 90%;
+        transform: translate(-50%, -50%);
+        left: 50%;
+        background-color: white;
+        padding: 1rem;
+        border-radius: 0.5rem;
+      }
+
+      .button {
+        background-color: black; /* Green */
+        border: none;
+        color: white;
+        padding: 2rem 2rem;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        border-radius: 0.5rem;
+        font-weight: bold;
+      }
+
+      .button:hover {
+        background-color: rgb(98, 2, 2);
+        cursor: pointer;
+      }
+    </style>
   </head>
   <body>
-    <h1>Astro</h1>
-    <button id="template1">skateboard 1</button>
-    <button id="template2">skateboard 2</button>
-    <button id="template3">skateboard 3</button>
+    <h1>Skateboard configurator</h1>
+    <div class="templates">
+      <button id="template1" class="button">skateboard 1</button>
+      <button id="template2" class="button">skateboard 2</button>
+      <button id="template3" class="button">skateboard 3</button>
+      <button id="save" class="button">save</button>
+    </div>
+    <div class="" id="presets"></div>
     <canvas class="webgl"></canvas>
   </body>
 </html>
@@ -97,12 +130,13 @@
   const params = {
     textField: 'image url',
   }
+  let url = ''
 
   gui
     .add(params, 'textField')
     .name('Deck art')
     .onFinishChange(function (value) {
-      let url = value
+      url = value
       console.log(url)
       new THREE.TextureLoader().load(url, (texture) => {
         //Update Texture
@@ -128,9 +162,9 @@
 
     scenexx.traverse(function (object) {
       if (object.material) materials.push(object.material)
-      console.log(materials)
+      //console.log(materials)
     })
-    gltf.scene.scale.set(0.5, 0.5, 0.5)
+    gltf.scene.scale.set(0.75, 0.75, 0.75)
     scene.add(gltf.scene)
   })
 
@@ -138,6 +172,101 @@
   scene.add(ambientLight)
 
   //controls.update() must be called after any manual changes to the camera's transform
+
+  const save = document.querySelector('#save')
+  save.addEventListener('click', () => {
+    console.log('save')
+    saveLocalStorage()
+    clickEvent()
+  })
+
+  const clickEvent = () => {
+    let presets = document.querySelectorAll('.preset')
+    if (presets) {
+      console.log(presets)
+      for (let index = 0; index < presets.length; index++) {
+        let element = presets[index]
+        console.log(element)
+        element.addEventListener('click', () => {
+          let localPreset = localStorage.getItem(element.getAttribute('id'))
+          localPreset = JSON.parse(localPreset)
+          console.log(localPreset)
+          preset(
+            localPreset.UrlImg,
+            '#' + localPreset.WheelC,
+            '#' + localPreset.DeckC,
+          )
+        })
+      }
+    }
+  }
+
+  const presets = document.querySelector('#presets')
+
+  if (window.localStorage.length) {
+    Object.keys(window.localStorage).forEach(function (key, index) {
+      console.log(key)
+      if (key[0] + key[1] === 'id') {
+        const newPreset = document.createElement('button')
+        newPreset.classList.add('button')
+        newPreset.classList.add('preset')
+        newPreset.setAttribute('id', key)
+        newPreset.innerHTML = 'Preset'
+        presets.appendChild(newPreset)
+      }
+    })
+    clickEvent()
+    console.log(window.localStorage)
+    console.log('woppa')
+  }
+
+  const saveLocalStorage = () => {
+    console.log(url)
+    console.log(decimalToHexString(materials[6].color.getHex()))
+    console.log(decimalToHexString(materials[0].color.getHex()))
+    let uniq = 'id' + new Date().getTime()
+    let dict = {
+      Id: uniq,
+      UrlImg: url,
+      WheelC: decimalToHexString(materials[6].color.getHex()),
+      DeckC: decimalToHexString(materials[0].color.getHex()),
+    }
+    localStorage.setItem(uniq, JSON.stringify(dict))
+    const newPreset = document.createElement('button')
+    newPreset.classList.add('button')
+    newPreset.classList.add('preset')
+    newPreset.setAttribute('id', uniq)
+    newPreset.innerHTML = 'Preset'
+    presets.appendChild(newPreset)
+
+    // localStorage.setItem('url', url)
+    // localStorage.setItem(
+    //   'wheelcolor',
+    //   decimalToHexString(materials[6].color.getHex()),
+    // )
+    // localStorage.setItem(
+    //   'deckcolor',
+    //   decimalToHexString(materials[0].color.getHex()),
+    // )
+  }
+
+  const decimalToHexString = (hex) => {
+    if (hex < 0) {
+      hex = 0xffffffff + hex + 1
+    }
+
+    return hex.toString(16).toUpperCase()
+  }
+
+  const preset = (url, wheelcolor, deckcolor) => {
+    new THREE.TextureLoader().load(url, (texture) => {
+      //Update Texture
+      materials[0].map = texture
+      materials[0].needsUpdate = true
+    })
+    materials[6].color.set(wheelcolor)
+    materials[0].color.set(deckcolor)
+  }
 
   const template1 = () => {
     new THREE.TextureLoader().load(
@@ -177,23 +306,23 @@
   }
 
   const btn1 = document.querySelector('#template1')
-  console.log(btn1)
+  //console.log(btn1)
   btn1.addEventListener('click', () => {
-	console.log('template1')
+    console.log('template1')
     template1()
   })
 
   const btn2 = document.querySelector('#template2')
-  console.log(btn2)
+  //console.log(btn2)
   btn2.addEventListener('click', () => {
-	console.log('template2')
+    console.log('template2')
     template2()
   })
 
   const btn3 = document.querySelector('#template3')
-  console.log(btn3)
+  //console.log(btn3)
   btn3.addEventListener('click', () => {
-	console.log('template3')
+    console.log('template3')
     template3()
   })
 
