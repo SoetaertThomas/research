@@ -1,4 +1,6 @@
 ---
+import { Modal } from 'accessible-astro-components'
+import MySwiper from '../components/MySwiper'
 ---
 
 <html lang="en">
@@ -8,46 +10,53 @@
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>Skateboard configurator</title>
-    <style>
-      .templates {
-        position: fixed;
-        top: 90%;
-        transform: translate(-50%, -50%);
-        left: 50%;
-        background-color: white;
-        padding: 1rem;
-        border-radius: 0.5rem;
-      }
-
-      .button {
-        background-color: black; /* Green */
-        border: none;
-        color: white;
-        padding: 2rem 2rem;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        border-radius: 0.5rem;
-        font-weight: bold;
-      }
-
-      .button:hover {
-        background-color: rgb(98, 2, 2);
-        cursor: pointer;
-      }
-    </style>
   </head>
-  <body>
-    <h1>Skateboard configurator</h1>
-    <div class="templates">
-      <button id="template1" class="button">skateboard 1</button>
-      <button id="template2" class="button">skateboard 2</button>
-      <button id="template3" class="button">skateboard 3</button>
-      <button id="save" class="button">save</button>
+  <body class="bg-[url('https://wallpapercave.com/wp/wp1168215.jpg')] bg-cover font-OpenSans">
+    <div class="m-auto">
+      <div class="bg-gray-100 w-1/4 py-12 px-14 fixed right-48 rounded-lg top-[50%] translate-y-[-50%]">
+        <h1 class="text-4xl font-bold mb-4 ">Skateboard configurator</h1>
+        <p class="text-gray-700">
+          With this 3d configurator you can adjust your skateboard the way you
+          like it!
+        </p>
+        <div class="templates">
+          <h2 class="font-semibold text-2xl mb-6 mt-6">Presets</h2>
+          <MySwiper client:load />
+        </div>
+        <div id="menu">
+          <h2 class="font-semibold text-2xl mb-6 mt-6">Customize</h2>
+          <div class="flex items-center gap-4 mb-2">
+            <h2 class="text-lg w-28 text-gray-700">Customs</h2>
+            <select name="custompresets" id="custompresets" class="hidden h-10 rounded px-2">
+            <option selected disabled hidden>select custom</option>
+          </select>
+          </div>
+          <div class="flex items-center gap-4 mb-2">
+            <h2 class="text-lg w-28 text-gray-700">Wheel color</h2>
+            <input type="color" id="wheelcolor" class="h-10 rounded-2xl" />
+          </div>
+          <div class="flex items-center gap-4 mb-2">
+            <h2 class="text-lg w-28 text-gray-700">Deck color</h2>
+            <input type="color" id="deckcolor" class="h-10 rounded-2xl" />
+          </div>
+          <div class="flex items-center gap-4">
+            <h2 class="text-lg w-28 text-gray-700">Deck art</h2>
+            <input type="text" id="urlInput" placeholder="paste url here" class="h-10 rounded px-2" />
+          </div>
+          <button
+            class="flex justify-center items-center text-lg font-bold px-28 py-4 bg-black text-white mt-8 rounded"
+            id="saveModel">save</button
+          >
+        </div>
+      </div>
+      <div id="presets"></div>
     </div>
-    <div class="" id="presets"></div>
-    <canvas class="webgl"></canvas>
+    <canvas class="webgl h-[756px] w-2/4 fixed top-[50%] translate-y-[-50%] left-48 rounded-lg"></canvas>
+    <Modal triggerId="saveModel" title="Enter preset name" closeText="Cancel">
+      <input type="text" id="presetname" />
+
+      <button onclick="closeModal()" id="save">Save preset</button>
+    </Modal>
   </body>
 </html>
 <script>
@@ -76,15 +85,15 @@
   })
 
   const sizes = {
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: canvas.clientWidth,
+    height: canvas.clientHeight,
   }
 
   renderer.shadowMap.enabled = true
   renderer.shadowMap.type = THREE.PCFSoftShadowMap
   renderer.setSize(sizes.width, sizes.height)
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-  renderer.setClearColor('#ADD8E6', 0.5)
+  renderer.setPixelRatio(sizes.width / sizes.height)
+  renderer.setClearColor('#f3f4f6', 0.6)
 
   document.body.appendChild(canvas)
 
@@ -96,7 +105,7 @@
   controls.autoRotate = true
   controls.update()
 
-  const gui = new GUI()
+  //const gui = new GUI()
   //   var img = {
   //     changeImage: function () {
   //       console.log('clicked')
@@ -118,36 +127,59 @@
   //       //   }
   //     },
   //   }
-  const options = {
-    Deck: 0x00ff00,
-    Wheels: 0x00ff00,
-  }
-  gui.addColor(options, 'Wheels').onChange((e) => {
-    materials[6].color.set(e)
+
+  const wheelcolor = document.querySelector('#wheelcolor')
+  wheelcolor.addEventListener('input', () => {
+    //console.log(wheelcolor.value)
+    materials[6].color.set(wheelcolor.value)
   })
 
-  // gui.add(img, 'changeImage').name('change image')
-  const params = {
-    textField: 'image url',
-  }
-  let url = ''
+  const deckcolor = document.querySelector('#deckcolor')
+  deckcolor.addEventListener('input', () => {
+    //console.log(wheelcolor.value)
+    materials[0].color.set(deckcolor.value)
+  })
 
-  gui
-    .add(params, 'textField')
-    .name('Deck art')
-    .onFinishChange(function (value) {
-      url = value
-      console.log(url)
-      new THREE.TextureLoader().load(url, (texture) => {
-        //Update Texture
-        materials[0].map = texture
-        materials[0].needsUpdate = true
-      })
+  const urlInput = document.querySelector('#urlInput')
+  urlInput.addEventListener('change', () => {
+    console.log(urlInput.value)
+    new THREE.TextureLoader().load(urlInput.value, (texture) => {
+      //Update Texture
+      materials[0].map = texture
+      materials[0].needsUpdate = true
     })
-
-  gui.addColor(options, 'Deck').onChange((e) => {
-    materials[0].color.set(e)
   })
+
+  //   const options = {
+  //     Deck: 0x00ff00,
+  //     Wheels: 0x00ff00,
+  //   }
+  //   gui.addColor(options, 'Wheels').onChange((e) => {
+  //     materials[6].color.set(e)
+  //   })
+
+  //   // gui.add(img, 'changeImage').name('change image')
+  //   const params = {
+  //     textField: 'image url',
+  //   }
+  //   let url = ''
+
+  //   gui
+  //     .add(params, 'textField')
+  //     .name('Deck art')
+  //     .onFinishChange(function (value) {
+  //       url = value
+  //       console.log(url)
+  //       new THREE.TextureLoader().load(url, (texture) => {
+  //         //Update Texture
+  //         materials[0].map = texture
+  //         materials[0].needsUpdate = true
+  //       })
+  //     })
+
+  //   gui.addColor(options, 'Deck').onChange((e) => {
+  //     materials[0].color.set(e)
+  //   })
 
   const dracolader = new DRACOLoader()
   dracolader.setDecoderPath('../draco/')
@@ -175,69 +207,71 @@
 
   const save = document.querySelector('#save')
   save.addEventListener('click', () => {
-    console.log('save')
+    //console.log('save')
     saveLocalStorage()
     clickEvent()
   })
 
   const clickEvent = () => {
-    let presets = document.querySelectorAll('.preset')
-    if (presets) {
-      console.log(presets)
-      for (let index = 0; index < presets.length; index++) {
-        let element = presets[index]
-        console.log(element)
-        element.addEventListener('click', () => {
-          let localPreset = localStorage.getItem(element.getAttribute('id'))
+    let custom = document.querySelector('#custompresets')
+    custom.addEventListener('change',  () => {
+      let localPreset = localStorage.getItem(custom.value)
           localPreset = JSON.parse(localPreset)
-          console.log(localPreset)
+          //console.log(localPreset)
           preset(
             localPreset.UrlImg,
-            '#' + localPreset.WheelC,
-            '#' + localPreset.DeckC,
+            '0x' + localPreset.WheelC.toLowerCase(),
+            '0x' + localPreset.DeckC.toLowerCase(),
           )
-        })
-      }
-    }
+    })
   }
 
-  const presets = document.querySelector('#presets')
+  const presets = document.querySelector('#custompresets')
 
   if (window.localStorage.length) {
+    presets.classList.remove('hidden')
     Object.keys(window.localStorage).forEach(function (key, index) {
-      console.log(key)
+      //console.log(key)
       if (key[0] + key[1] === 'id') {
-        const newPreset = document.createElement('button')
-        newPreset.classList.add('button')
+        const newPreset = document.createElement('option')
+        // newPreset.classList.add('button')
         newPreset.classList.add('preset')
-        newPreset.setAttribute('id', key)
-        newPreset.innerHTML = 'Preset'
+        //newPreset.setAttribute('id', key)
+        newPreset.value = key
+        let data = window.localStorage.getItem(key)
+        data = JSON.parse(data)
+        console.log(data.PresetName)
+        newPreset.innerHTML = data.PresetName
         presets.appendChild(newPreset)
       }
     })
     clickEvent()
-    console.log(window.localStorage)
-    console.log('woppa')
+    //console.log(window.localStorage)
+    //console.log('woppa')
   }
 
   const saveLocalStorage = () => {
-    console.log(url)
-    console.log(decimalToHexString(materials[6].color.getHex()))
-    console.log(decimalToHexString(materials[0].color.getHex()))
+    //console.log(url)
+    //console.log(decimalToHexString(materials[6].color.getHex()))
+    //console.log(decimalToHexString(materials[0].color.getHex()))
+    let presetName = document.querySelector('#presetname')
+    //console.log(presetName.value)
     let uniq = 'id' + new Date().getTime()
     let dict = {
       Id: uniq,
-      UrlImg: url,
+      UrlImg: urlInput.value,
       WheelC: decimalToHexString(materials[6].color.getHex()),
       DeckC: decimalToHexString(materials[0].color.getHex()),
+      PresetName: presetName.value,
     }
     localStorage.setItem(uniq, JSON.stringify(dict))
-    const newPreset = document.createElement('button')
-    newPreset.classList.add('button')
+    const newPreset = document.createElement('option')
+   //newPreset.classList.add('button')
     newPreset.classList.add('preset')
-    newPreset.setAttribute('id', uniq)
-    newPreset.innerHTML = 'Preset'
+    newPreset.value = uniq
+    newPreset.innerHTML = presetName.value
     presets.appendChild(newPreset)
+    presets.classList.remove('hidden')
 
     // localStorage.setItem('url', url)
     // localStorage.setItem(
@@ -264,8 +298,8 @@
       materials[0].map = texture
       materials[0].needsUpdate = true
     })
-    materials[6].color.set(wheelcolor)
-    materials[0].color.set(deckcolor)
+    materials[6].color.set(parseInt(wheelcolor))
+    materials[0].color.set(parseInt(deckcolor))
   }
 
   const template1 = () => {
@@ -278,11 +312,11 @@
       },
     )
     materials[6].color.set(0x52a0f0)
-    materials[0].color.set(0xff00b4)
+    materials[0].color.set(0xffffff)
   }
   const template2 = () => {
     new THREE.TextureLoader().load(
-      'https://sites.create-cdn.net/siteimages/19/1/7/191789/15/9/6/15966898/1000x741.jpg?1510065961',
+      'https://static.standaard.be/Assets/Images_Upload/2017/07/13/c5d28dac-67b9-11e7-8c3c-11de46a62a49.jpg?width=1152&format=jpg',
       (texture) => {
         //Update Texture
         materials[0].map = texture
@@ -302,7 +336,7 @@
       },
     )
     materials[6].color.set(0xff9500)
-    materials[0].color.set(0xff0000)
+    materials[0].color.set(0xffffff)
   }
 
   const btn1 = document.querySelector('#template1')
