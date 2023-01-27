@@ -128,7 +128,7 @@ gltfLoader.setDRACOLoader(dracolader)
 
 const materials = []
 
-gltfLoader.load('../../public/model/skateboard/scene.gltf', (gltf) => {
+gltfLoader.load('/model/skateboard/scene.gltf', (gltf) => {
   const scenexx = gltf.scene
 
   scenexx.traverse(function (object) {
