@@ -139,7 +139,7 @@ gltfLoader.load('../../public/model/skateboard/scene.gltf', (gltf) => {
   scene.add(gltf.scene)
 })
 
-const ambientLight = new THREE.AmbientLight(0xf0f2d4, 0.8)
+const ambientLight = new THREE.AmbientLight(0xf0f2d4, 1)
 scene.add(ambientLight)
 
 //controls.update() must be called after any manual changes to the camera's transform
