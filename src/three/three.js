@@ -166,9 +166,12 @@ const clickEvent = () => {
 }
 
 const presets = document.querySelector('#custompresets')
+const presetTitle = document.querySelector('#custompresettitle')
+presetTitle.classList.add('hidden')
 
-if (window.localStorage.length) {
+if (window.localStorage.length > 1) {
   presets.classList.remove('hidden')
+  presetTitle.classList.remove('hidden')
   Object.keys(window.localStorage).forEach(function (key, index) {
     //console.log(key)
     if (key[0] + key[1] === 'id') {
@@ -211,6 +214,7 @@ const saveLocalStorage = () => {
   newPreset.innerHTML = presetName.value
   presets.appendChild(newPreset)
   presets.classList.remove('hidden')
+  presetTitle.classList.remove('hidden')
 
   // localStorage.setItem('url', url)
   // localStorage.setItem(
